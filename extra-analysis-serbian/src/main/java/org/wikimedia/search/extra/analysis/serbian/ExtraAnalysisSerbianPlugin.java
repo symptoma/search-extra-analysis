@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
+import org.elasticsearch.index.analysis.AnalyzerProvider;
 import org.elasticsearch.index.analysis.PreConfiguredTokenFilter;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.indices.analysis.AnalysisModule;
@@ -38,5 +40,10 @@ public class ExtraAnalysisSerbianPlugin extends Plugin implements AnalysisPlugin
                 return new SerbianStemmerTokenFilter(tokenStream);
             }
         });
+    }
+
+    @Override
+    public Map<String, AnalysisModule.AnalysisProvider<AnalyzerProvider<? extends Analyzer>>> getAnalyzers() {
+        return Collections.singletonMap("serbian", SerbianAnalyzerProvider::new);
     }
 }
