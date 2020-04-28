@@ -9,7 +9,6 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
-import org.elasticsearch.common.lucene.all.AllTokenStream;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.IndexSettings;
@@ -38,7 +37,6 @@ public class EsperantoStemmerESTest extends ESTestCase {
 
     private void match(String analyzerName, String source, String target) throws IOException {
         Analyzer analyzer = indexAnalyzers.get(analyzerName).analyzer();
-
         TokenStream stream = AllTokenStream.allTokenStream("_all", source, 1.0f, analyzer);
         stream.reset();
         CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
