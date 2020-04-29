@@ -216,8 +216,9 @@ public class LjubesicPandzicStemmer {
     /* Convert a single Cyrillic character to Latin character or digraph.
      */
     private String convertCyrillicToLatinCharacter(char character) {
-        if (cyr2LatMap.containsKey(character)) {
-            return cyr2LatMap.get(character);
+        String latinCharacter = cyr2LatMap.get(character);
+        if (latinCharacter != null) {
+            return latinCharacter;
         }
         return Character.toString(character);
     }
