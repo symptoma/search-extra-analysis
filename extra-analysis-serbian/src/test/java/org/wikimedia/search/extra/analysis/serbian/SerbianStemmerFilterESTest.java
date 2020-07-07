@@ -8,7 +8,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.elasticsearch.Version;
-import org.elasticsearch.cluster.metadata.IndexMetaData;
+import org.elasticsearch.cluster.metadata.IndexMetadata;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.IndexSettings;
@@ -34,7 +34,7 @@ public class SerbianStemmerFilterESTest extends ESTestCase {
     private void assertAnalyzerAvailable(String analyzerName, String analysisResource) throws IOException {
         Settings indexSettings = settings(Version.CURRENT)
                 .loadFromStream(analysisResource, this.getClass().getResourceAsStream(analysisResource), false)
-                .put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT)
+                .put(IndexMetadata.SETTING_VERSION_CREATED, Version.CURRENT)
                 .build();
         IndexSettings indexProps = IndexSettingsModule.newIndexSettings("test", indexSettings);
         Settings settings = Settings.builder()
