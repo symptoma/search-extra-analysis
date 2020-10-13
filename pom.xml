@@ -10,7 +10,7 @@
 
     <groupId>org.wikimedia.search</groupId>
     <artifactId>extra-analysis</artifactId>
-    <version>6.8.12.0-SNAPSHOT</version>
+    <version>6.8.12.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Elasticsearch extra plugins (GPL)</name>
     <description>Extra (GPL) Analysis Modules for Elasticsearch.</description>
