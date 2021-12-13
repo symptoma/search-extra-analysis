@@ -43,7 +43,7 @@
     <properties>
         <elasticsearch.version>6.8.21</elasticsearch.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <log4j.version>2.15.0</log4j.version>
+        <log4j.version>2.14.1</log4j.version>
         <lucene.version>7.7.3</lucene.version>
         <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -81,7 +81,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.13.2</version>
+                <version>4.12</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
