@@ -10,7 +10,7 @@
 
     <groupId>org.wikimedia.search</groupId>
     <artifactId>extra-analysis</artifactId>
-    <version>6.8.21.0-SNAPSHOT</version>
+    <version>6.8.23.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Elasticsearch extra plugins (GPL)</name>
     <description>Extra (GPL) Analysis Modules for Elasticsearch.</description>
@@ -41,7 +41,7 @@
     </issueManagement>
 
     <properties>
-        <elasticsearch.version>6.8.21</elasticsearch.version>
+        <elasticsearch.version>6.8.23</elasticsearch.version>
         <hamcrest.version>2.2</hamcrest.version>
         <log4j.version>2.14.1</log4j.version>
         <lucene.version>7.7.3</lucene.version>
