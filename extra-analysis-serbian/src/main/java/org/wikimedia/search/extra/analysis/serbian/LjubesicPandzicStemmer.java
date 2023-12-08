@@ -1,8 +1,8 @@
 package org.wikimedia.search.extra.analysis.serbian;
 
-import static java.util.Collections.unmodifiableSet;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Set;
 
-//import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * This file was forked from this repo under a GPLv3 license:
@@ -67,9 +67,13 @@ import java.util.Set;
  */
 public class LjubesicPandzicStemmer {
 
+    @SuppressFBWarnings(value = "DMC_DUBIOUS_MAP_COLLECTION", justification = "Used as a map later")
     static class Transformations {
+        @SuppressFBWarnings(value = "FCBL_FIELD_COULD_BE_LOCAL", justification = "Used as a field later")
         private final Map<String, String> map;
+        @SuppressFBWarnings(value = "FCBL_FIELD_COULD_BE_LOCAL", justification = "Used as a field later")
         private final int minLen;
+        @SuppressFBWarnings(value = "FCBL_FIELD_COULD_BE_LOCAL", justification = "Used as a field later")
         private final int maxLen;
 
         Transformations(Map<String, String> transformations) {
