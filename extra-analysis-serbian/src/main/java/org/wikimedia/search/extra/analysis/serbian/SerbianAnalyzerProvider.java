@@ -7,15 +7,15 @@ import org.elasticsearch.index.analysis.AbstractIndexAnalyzerProvider;
 
 public class SerbianAnalyzerProvider extends AbstractIndexAnalyzerProvider<SerbianAnalyzer> {
 
-  private final SerbianAnalyzer analyzer;
+    private final SerbianAnalyzer analyzer;
 
-  public SerbianAnalyzerProvider(IndexSettings indexSettings, Environment env, String name, Settings settings) {
-    super(indexSettings, name, settings);
-    analyzer = new SerbianAnalyzer();
-  }
+    public SerbianAnalyzerProvider(IndexSettings indexSettings, Environment env, String name, Settings settings) {
+        super(indexSettings, name, settings);
+        analyzer = new SerbianAnalyzer();
+    }
 
-  @Override
-  public SerbianAnalyzer get() {
-    return this.analyzer;
-  }
+    @Override
+    public SerbianAnalyzer get() {
+        return this.analyzer;
+    }
 }

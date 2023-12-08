@@ -18,9 +18,9 @@ import java.util.Set;
 
 /**
  * This file was forked from this repo under a GPLv3 license:
- *    https://github.com/Trey314159/SCStemmers
+ * https://github.com/Trey314159/SCStemmers
  * which was forked from this repo under a GPLv3 license:
- *    https://github.com/vukbatanovic/SCStemmers
+ * https://github.com/vukbatanovic/SCStemmers
  * <p>
  * Ova klasa implementira stemer za hrvatski "Simple stemmer for
  * Croatian v0.1" Nikole Ljubešića i Ivana Pandžića. Originalna
@@ -91,53 +91,60 @@ public class LjubesicPandzicStemmer {
      *
      * <i>The map of suffix transformations.</i>
      */
-    private static final Transformations transformations = new Transformations(unmodifiableMap(initTransformations()));
+    private static final Transformations TRANSFORMATIONS = new Transformations(unmodifiableMap(initTransformations()));
 
-    /** Lista stop-reči. Korišćena je implementacija u vidu hashseta radi brzine.
+    /**
+     * Lista stop-reči. Korišćena je implementacija u vidu hashseta radi brzine.
      * <p>
      * <i>The list of stop-words. A hashset implementation was used for the sake of efficiency.</i>
      */
-    private static final Set<String> stopset = unmodifiableSet(initStopSet());
+    private static final Set<String> STOPSET = unmodifiableSet(initStopSet());
 
-    /** Lista morfoloških obrazaca reči.
+    /**
+     * Lista morfoloških obrazaca reči.
      * <p>
      * <i>The list of morphological patterns of words.</i>
      */
-    private static final List<Pattern> wordPatterns = unmodifiableList(initWordPatterns());
+    private static final List<Pattern> WORD_PATTERNS = unmodifiableList(initWordPatterns());
 
-    /** Skup samoglasnika.
+    /**
+     * Skup samoglasnika.
      * <p>
      * <i>The set of vowels.</i>
      */
-    private static final Pattern vowelPattern = Pattern.compile("[aeiouR]");
+    private static final Pattern VOWEL_PATTERN = Pattern.compile("[aeiouR]");
 
-    /** Pattern for matching Syllabic R.
+    /**
+     * Pattern for matching Syllabic R.
      */
-    private static final Pattern syllabicRPattern = Pattern.compile("(^|[^aeiou])r($|[^aeiou])");
+    private static final Pattern SYLLABIC_R_PATTERN = Pattern.compile("(^|[^aeiou])r($|[^aeiou])");
 
-    /** String transformations should be localized to Serbian.
+    /**
+     * String transformations should be localized to Serbian.
      */
-    private static final Locale srLocale = new Locale("sr");
+    private static final Locale SR_LOCALE = new Locale("sr");
 
-    /** Mapping from Latin to Cyrillic characters.
+    /**
+     * Mapping from Latin to Cyrillic characters.
      */
-    private static final Map<Character, String> cyr2LatMap = unmodifiableMap(initCyr2LatMap());
+    private static final Map<Character, String> CYR_2_LAT_MAP = unmodifiableMap(initCyr2LatMap());
 
     /**
      * Ako se naiđe na neku od stop-reči, ona se preskače. U suprotnom, sufiks reči se najpre transformiše a zatim i uklanja.
      * <p>
      * <i>If a stop-word is encountered, it is skipped. Otherwise, the suffix of the word is first transformed and then removed.</i>
+     *
      * @param word Reč koju treba obraditi
-     * <br><i>The word that should be processed</i>
+     *             <br><i>The word that should be processed</i>
      * @return Stemovana reč
      * <br><i> The stemmed word</i>
      */
     public String stemWord(String word) {
         word = convertCyrrilicToLatinString(word);
-        if (stopset.contains(word.toLowerCase(srLocale)))
+        if (STOPSET.contains(word.toLowerCase(SR_LOCALE)))
             return word;
         String stemmed = transform(word);
-        for (Pattern pattern : wordPatterns) {
+        for (Pattern pattern : WORD_PATTERNS) {
             Matcher matcher = pattern.matcher(stemmed);
             if (matcher.matches()) {
                 String wordStem = matcher.group(1);
@@ -152,21 +159,22 @@ public class LjubesicPandzicStemmer {
      * Zamenjuje sufiks reči transformisanom varijantom tog sufiksa.
      * <p>
      * <i>Replaces the word suffix with a transformed variant of that suffix.</i>
+     *
      * @param word Reč koju treba obraditi
-     * <br><i>The word that should be processed</i>
+     *             <br><i>The word that should be processed</i>
      * @return Transformisana reč
      * <br><i> The transformed word</i>
      */
     private String transform(String word) {
         int wordLength = word.length();
-        if (wordLength < transformations.minLen) {
+        if (wordLength < TRANSFORMATIONS.minLen) {
             // word is too short to have a suffix to transform
             return word;
         }
         // process suffixes longest to shortest to get most relevant match
-        for (int i = Math.min(wordLength, transformations.maxLen); i >= transformations.minLen; i--) {
+        for (int i = Math.min(wordLength, TRANSFORMATIONS.maxLen); i >= TRANSFORMATIONS.minLen; i--) {
             String wordEnding = word.substring(wordLength - i);
-            String replacement = transformations.map.get(wordEnding);
+            String replacement = TRANSFORMATIONS.map.get(wordEnding);
             if (replacement != null) {
                 return word.substring(0, wordLength - i) + replacement;
             }
@@ -180,25 +188,26 @@ public class LjubesicPandzicStemmer {
      * <i>Capitalizes the syllabic R in the given word, if it exists.</i>
      *
      * @param word Reč koju treba obraditi
-     * <br><i>The word that should be processed</i>
+     *             <br><i>The word that should be processed</i>
      * @return Reč sa kapitalizovanim slogotvornim R
      * <br><i>The word with the syllabic R capitalized</i>
      */
     private String capitalizeSyllabicR(String word) {
-        return syllabicRPattern.matcher(word).replaceAll("$1R$2");
+        return SYLLABIC_R_PATTERN.matcher(word).replaceAll("$1R$2");
     }
 
     /**
      * Proverava da li reč sadrži samoglasnik/slogotvorno R.
      * <p>
      * <i>Checks whether the word contains a vowel/syllabic R.</i>
+     *
      * @param word Reč koju treba obraditi
-     * <br><i>The word that should be processed</i>
+     *             <br><i>The word that should be processed</i>
      * @return True ako reč sadrži samoglasnik/slogotvorno R, false u suprotnom
      * <br><i>True if the word contains a vowel/syllabic R, false otherwise</i>
      */
     private boolean hasAVowel(String word) {
-        Matcher matcher = vowelPattern.matcher(capitalizeSyllabicR(word));
+        Matcher matcher = VOWEL_PATTERN.matcher(capitalizeSyllabicR(word));
         return matcher.find();
     }
 
@@ -216,7 +225,7 @@ public class LjubesicPandzicStemmer {
     /* Convert a single Cyrillic character to Latin character or digraph.
      */
     private String convertCyrillicToLatinCharacter(char character) {
-        String latinCharacter = cyr2LatMap.get(character);
+        String latinCharacter = CYR_2_LAT_MAP.get(character);
         if (latinCharacter != null) {
             return latinCharacter;
         }
@@ -258,13 +267,13 @@ public class LjubesicPandzicStemmer {
         stops.add("biste");
         stops.add("bjeste");
         stops.add("bijahu");
-    //    stops.add("biste");    // Batanović: Ponavljanja
-    //    stops.add("bjeste");    //          Repetitions
-    //    stops.add("bijahu");
-    //    stops.add("bi");
+        //    stops.add("biste");    // Batanović: Ponavljanja
+        //    stops.add("bjeste");    //          Repetitions
+        //    stops.add("bijahu");
+        //    stops.add("bi");
         stops.add("biše");
         stops.add("bjehu");
-    //    stops.add("bješe");
+        //    stops.add("bješe");
         stops.add("bio");
         stops.add("bili");
         stops.add("budimo");
@@ -308,36 +317,66 @@ public class LjubesicPandzicStemmer {
      */
     private static Map<Character, String> initCyr2LatMap() {
         Map<Character, String> c2l = new HashMap<>();
-        c2l.put('а', "a");        c2l.put('А', "A");
-        c2l.put('б', "b");        c2l.put('Б', "B");
-        c2l.put('в', "v");        c2l.put('В', "V");
-        c2l.put('г', "g");        c2l.put('Г', "G");
-        c2l.put('д', "d");        c2l.put('Д', "D");
-        c2l.put('ђ', "đ");        c2l.put('Ђ', "Đ");
-        c2l.put('е', "e");        c2l.put('Е', "E");
-        c2l.put('ж', "ž");        c2l.put('Ж', "Ž");
-        c2l.put('з', "z");        c2l.put('З', "Z");
-        c2l.put('и', "i");        c2l.put('И', "I");
-        c2l.put('ј', "j");        c2l.put('Ј', "J");
-        c2l.put('к', "k");        c2l.put('К', "K");
-        c2l.put('л', "l");        c2l.put('Л', "L");
-        c2l.put('љ', "lj");        c2l.put('Љ', "Lj");
-        c2l.put('м', "m");        c2l.put('М', "M");
-        c2l.put('н', "n");        c2l.put('Н', "N");
-        c2l.put('њ', "nj");        c2l.put('Њ', "Nj");
-        c2l.put('о', "o");        c2l.put('О', "O");
-        c2l.put('п', "p");        c2l.put('П', "P");
-        c2l.put('р', "r");        c2l.put('Р', "R");
-        c2l.put('с', "s");        c2l.put('С', "S");
-        c2l.put('т', "t");        c2l.put('Т', "T");
-        c2l.put('ћ', "ć");        c2l.put('Ћ', "Ć");
-        c2l.put('у', "u");        c2l.put('У', "U");
-        c2l.put('ф', "f");        c2l.put('Ф', "F");
-        c2l.put('х', "h");        c2l.put('Х', "H");
-        c2l.put('ц', "c");        c2l.put('Ц', "C");
-        c2l.put('ч', "č");        c2l.put('Ч', "Č");
-        c2l.put('џ', "dž");        c2l.put('Џ', "Dž");
-        c2l.put('ш', "š");        c2l.put('Ш', "Š");
+        c2l.put('а', "a");
+        c2l.put('А', "A");
+        c2l.put('б', "b");
+        c2l.put('Б', "B");
+        c2l.put('в', "v");
+        c2l.put('В', "V");
+        c2l.put('г', "g");
+        c2l.put('Г', "G");
+        c2l.put('д', "d");
+        c2l.put('Д', "D");
+        c2l.put('ђ', "đ");
+        c2l.put('Ђ', "Đ");
+        c2l.put('е', "e");
+        c2l.put('Е', "E");
+        c2l.put('ж', "ž");
+        c2l.put('Ж', "Ž");
+        c2l.put('з', "z");
+        c2l.put('З', "Z");
+        c2l.put('и', "i");
+        c2l.put('И', "I");
+        c2l.put('ј', "j");
+        c2l.put('Ј', "J");
+        c2l.put('к', "k");
+        c2l.put('К', "K");
+        c2l.put('л', "l");
+        c2l.put('Л', "L");
+        c2l.put('љ', "lj");
+        c2l.put('Љ', "Lj");
+        c2l.put('м', "m");
+        c2l.put('М', "M");
+        c2l.put('н', "n");
+        c2l.put('Н', "N");
+        c2l.put('њ', "nj");
+        c2l.put('Њ', "Nj");
+        c2l.put('о', "o");
+        c2l.put('О', "O");
+        c2l.put('п', "p");
+        c2l.put('П', "P");
+        c2l.put('р', "r");
+        c2l.put('Р', "R");
+        c2l.put('с', "s");
+        c2l.put('С', "S");
+        c2l.put('т', "t");
+        c2l.put('Т', "T");
+        c2l.put('ћ', "ć");
+        c2l.put('Ћ', "Ć");
+        c2l.put('у', "u");
+        c2l.put('У', "U");
+        c2l.put('ф', "f");
+        c2l.put('Ф', "F");
+        c2l.put('х', "h");
+        c2l.put('Х', "H");
+        c2l.put('ц', "c");
+        c2l.put('Ц', "C");
+        c2l.put('ч', "č");
+        c2l.put('Ч', "Č");
+        c2l.put('џ', "dž");
+        c2l.put('Џ', "Dž");
+        c2l.put('ш', "š");
+        c2l.put('Ш', "Š");
 
         return c2l;
     }
@@ -456,8 +495,8 @@ public class LjubesicPandzicStemmer {
         transforms.put("vaca", "vca");
         transforms.put("saca", "sca");
         transforms.put("sac", "sca");
-    //    transforms.put("naca", "nca");        // Batanović: Ponavljanja
-    //    transforms.put("nac", "nca");        //               Repetitions
+        //    transforms.put("naca", "nca");        // Batanović: Ponavljanja
+        //    transforms.put("nac", "nca");        //               Repetitions
         transforms.put("raca", "rca");
         transforms.put("rac", "rca");
         transforms.put("aoca", "alca");
@@ -498,79 +537,152 @@ public class LjubesicPandzicStemmer {
          */
         List<String> wordEnd = new ArrayList<>();
 
-        wordStart.add(".+(s|š)k"); wordEnd.add("ijima|ijega|ijemu|ijem|ijim|ijih|ijoj|ijeg|iji|ije|ija|oga|ome|omu|ima|og|om|im|ih|oj|i|e|o|a|u");
-        wordStart.add(".+(s|š)tv"); wordEnd.add("ima|om|o|a|u");
-        wordStart.add(".+(t|m|p|r|g)anij"); wordEnd.add("ama|ima|om|a|u|e|i|");
-        wordStart.add(".+an"); wordEnd.add("inom|ina|inu|ine|ima|in|om|u|i|a|e|");
-        wordStart.add(".+in"); wordEnd.add("ima|ama|om|a|e|i|u|o|");
-        wordStart.add(".+on"); wordEnd.add("ovima|ova|ove|ovi|ima|om|a|e|i|u|");
-        wordStart.add(".+n"); wordEnd.add("ijima|ijega|ijemu|ijeg|ijem|ijim|ijih|ijoj|iji|ije|ija|iju|ima|ome|omu|oga|oj|om|ih|im|og|o|e|a|u|i|");
-        wordStart.add(".+(a|e|u)ć"); wordEnd.add("oga|ome|omu|ega|emu|ima|oj|ih|om|eg|em|og|uh|im|e|a");
-        wordStart.add(".+ugov"); wordEnd.add("ima|i|e|a");
-        wordStart.add(".+ug"); wordEnd.add("ama|om|a|e|i|u|o");
-        wordStart.add(".+log"); wordEnd.add("ama|om|a|u|e|");
-        wordStart.add(".+[^eo]g"); wordEnd.add("ovima|ama|ovi|ove|ova|om|a|e|i|u|o|");
-        wordStart.add(".+(rrar|ott|ss|ll)i"); wordEnd.add("jem|ja|ju|o|");
-        wordStart.add(".+uj"); wordEnd.add("ući|emo|ete|mo|em|eš|e|u|");
-        wordStart.add(".+(c|č|ć|đ|l|r)aj"); wordEnd.add("evima|evi|eva|eve|ama|ima|em|a|e|i|u|");
-        wordStart.add(".+(b|c|d|l|n|m|ž|g|f|p|r|s|t|z)ij"); wordEnd.add("ima|ama|om|a|e|i|u|o|");
-        wordStart.add(".+[^z]nal"); wordEnd.add("ima|ama|om|a|e|i|u|o|");
-        wordStart.add(".+ijal"); wordEnd.add("ima|ama|om|a|e|i|u|o|");
-        wordStart.add(".+ozil"); wordEnd.add("ima|om|a|e|u|i|");
-        wordStart.add(".+olov"); wordEnd.add("ima|i|a|e");
-        wordStart.add(".+ol"); wordEnd.add("ima|om|a|u|e|i|");
-        wordStart.add(".+lem"); wordEnd.add("ama|ima|om|a|e|i|u|o|");
-        wordStart.add(".+ram"); wordEnd.add("ama|om|a|e|i|u|o");
-        wordStart.add(".+(a|d|e|o)r"); wordEnd.add("ama|ima|om|u|a|e|i|");
-        wordStart.add(".+(e|i)s"); wordEnd.add("ima|om|e|a|u");
-        wordStart.add(".+(t|n|j|k|j|t|b|g|v)aš"); wordEnd.add("ama|ima|om|em|a|u|i|e|");
-        wordStart.add(".+(e|i)š"); wordEnd.add("ima|ama|om|em|i|e|a|u|");
-        wordStart.add(".+ikat"); wordEnd.add("ima|om|a|e|i|u|o|");
-        wordStart.add(".+lat"); wordEnd.add("ima|om|a|e|i|u|o|");
-        wordStart.add(".+et"); wordEnd.add("ama|ima|om|a|e|i|u|o|");
-        wordStart.add(".+(e|i|k|o)st"); wordEnd.add("ima|ama|om|a|e|i|u|o|");
-        wordStart.add(".+išt"); wordEnd.add("ima|em|a|e|u");
-        wordStart.add(".+ova"); wordEnd.add("smo|ste|hu|ti|še|li|la|le|lo|t|h|o");
-        wordStart.add(".+(a|e|i)v"); wordEnd.add("ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|ama|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|o|");
-        wordStart.add(".+[^dkml]ov"); wordEnd.add("ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|o|");
-        wordStart.add(".+(m|l)ov"); wordEnd.add("ima|om|a|u|e|i|");
-        wordStart.add(".+el"); wordEnd.add("ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|o|");
-        wordStart.add(".+(a|e|š)nj"); wordEnd.add("ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|iji|ije|ija|iju|ega|emu|eg|em|im|ih|oj|om|og|a|e|i|o|u");
-        wordStart.add(".+čin"); wordEnd.add("ama|ome|omu|oga|ima|og|om|im|ih|oj|a|u|i|o|e|");
-        wordStart.add(".+roši"); wordEnd.add("vši|smo|ste|še|mo|te|ti|li|la|lo|le|m|š|t|h|o");
-        wordStart.add(".+oš"); wordEnd.add("ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|");
-        wordStart.add(".+(e|o)vit"); wordEnd.add("ijima|ijega|ijemu|ijem|ijim|ijih|ijoj|ijeg|iji|ije|ija|oga|ome|omu|ima|og|om|im|ih|oj|i|e|o|a|u|");
-        wordStart.add(".+ast"); wordEnd.add("ijima|ijega|ijemu|ijem|ijim|ijih|ijoj|ijeg|iji|ije|ija|oga|ome|omu|ima|og|om|im|ih|oj|i|e|o|a|u|");
-        wordStart.add(".+k"); wordEnd.add("ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|o|");
-        wordStart.add(".+(e|a|i|u)va"); wordEnd.add("jući|smo|ste|jmo|jte|ju|la|le|li|lo|mo|na|ne|ni|no|te|ti|še|hu|h|j|m|n|o|t|v|š|");
-        wordStart.add(".+ir"); wordEnd.add("ujemo|ujete|ujući|ajući|ivat|ujem|uješ|ujmo|ujte|avši|asmo|aste|ati|amo|ate|aju|aše|ahu|ala|alo|ali|ale|uje|uju|uj|al|an|am|aš|at|ah|ao");
-        wordStart.add(".+ač"); wordEnd.add("ismo|iste|iti|imo|ite|iše|eći|ila|ilo|ili|ile|ena|eno|eni|ene|io|im|iš|it|ih|en|i|e");
-        wordStart.add(".+ača"); wordEnd.add("vši|smo|ste|smo|ste|hu|ti|mo|te|še|la|lo|li|le|ju|na|no|ni|ne|o|m|š|t|h|n");
-        wordStart.add(".+n"); wordEnd.add("uvši|usmo|uste|ući|imo|ite|emo|ete|ula|ulo|ule|uli|uto|uti|uta|em|eš|uo|ut|e|u|i");
-        wordStart.add(".+ni"); wordEnd.add("vši|smo|ste|ti|mo|te|mo|te|la|lo|le|li|m|š|o");
-        wordStart.add(".+((a|r|i|p|e|u)st|[^o]g|ik|uc|oj|aj|lj|ak|ck|čk|šk|uk|nj|im|ar|at|et|št|it|ot|ut|zn|zv)a"); wordEnd.add("jući|vši|smo|ste|jmo|jte|jem|mo|te|je|ju|ti|še|hu|la|li|le|lo|na|no|ni|ne|t|h|o|j|n|m|š");
-        wordStart.add(".+ur"); wordEnd.add("ajući|asmo|aste|ajmo|ajte|amo|ate|aju|ati|aše|ahu|ala|ali|ale|alo|ana|ano|ani|ane|al|at|ah|ao|aj|an|am|aš");
-        wordStart.add(".+(a|i|o)staj"); wordEnd.add("asmo|aste|ahu|ati|emo|ete|aše|ali|ući|ala|alo|ale|mo|ao|em|eš|at|ah|te|e|u|");
-        wordStart.add(".+(b|c|č|ć|d|e|f|g|j|k|n|r|t|u|v)a"); wordEnd.add("lama|lima|lom|lu|li|la|le|lo|l");
-        wordStart.add(".+(t|č|j|ž|š)aj"); wordEnd.add("evima|evi|eva|eve|ama|ima|em|a|e|i|u|");
-        wordStart.add(".+([^o]m|ič|nč|uč|b|c|ć|d|đ|h|j|k|l|n|p|r|s|š|v|z|ž)a"); wordEnd.add("jući|vši|smo|ste|jmo|jte|mo|te|ju|ti|še|hu|la|li|le|lo|na|no|ni|ne|t|h|o|j|n|m|š");
-        wordStart.add(".+(a|i|o)sta"); wordEnd.add("dosmo|doste|doše|nemo|demo|nete|dete|nimo|nite|nila|vši|nem|dem|neš|deš|doh|de|ti|ne|nu|du|la|li|lo|le|t|o");
-        wordStart.add(".+ta"); wordEnd.add("smo|ste|jmo|jte|vši|ti|mo|te|ju|še|la|lo|le|li|na|no|ni|ne|n|j|o|m|š|t|h");
-        wordStart.add(".+inj"); wordEnd.add("asmo|aste|ati|emo|ete|ali|ala|alo|ale|aše|ahu|em|eš|at|ah|ao");
-        wordStart.add(".+as"); wordEnd.add("temo|tete|timo|tite|tući|tem|teš|tao|te|li|ti|la|lo|le");
-        wordStart.add(".+(elj|ulj|tit|ac|ič|od|oj|et|av|ov)i"); wordEnd.add("vši|eći|smo|ste|še|mo|te|ti|li|la|lo|le|m|š|t|h|o");
-        wordStart.add(".+(tit|jeb|ar|ed|uš|ič)i"); wordEnd.add("jemo|jete|jem|ješ|smo|ste|jmo|jte|vši|mo|še|te|ti|ju|je|la|lo|li|le|t|m|š|h|j|o");
-        wordStart.add(".+(b|č|d|l|m|p|r|s|š|ž)i"); wordEnd.add("jemo|jete|jem|ješ|smo|ste|jmo|jte|vši|mo|lu|še|te|ti|ju|je|la|lo|li|le|t|m|š|h|j|o");
-        wordStart.add(".+luč"); wordEnd.add("ujete|ujući|ujemo|ujem|uješ|ismo|iste|ujmo|ujte|uje|uju|iše|iti|imo|ite|ila|ilo|ili|ile|ena|eno|eni|ene|uj|io|en|im|iš|it|ih|e|i");
-        wordStart.add(".+jeti"); wordEnd.add("smo|ste|še|mo|te|ti|li|la|lo|le|m|š|t|h|o");
-        wordStart.add(".+e"); wordEnd.add("lama|lima|lom|lu|li|la|le|lo|l");
-        wordStart.add(".+i"); wordEnd.add("lama|lima|lom|lu|li|la|le|lo|l");
-        wordStart.add(".+at"); wordEnd.add("ijega|ijemu|ijima|ijeg|ijem|ijih|ijim|ima|oga|ome|omu|iji|ije|ija|iju|oj|og|om|im|ih|a|u|i|e|o|");
-        wordStart.add(".+et"); wordEnd.add("avši|ući|emo|imo|em|eš|e|u|i");
-        wordStart.add(".+"); wordEnd.add("ajući|alima|alom|avši|asmo|aste|ajmo|ajte|ivši|amo|ate|aju|ati|aše|ahu|ali|ala|ale|alo|ana|ano|ani|ane|am|aš|at|ah|ao|aj|an");
-        wordStart.add(".+"); wordEnd.add("anje|enje|anja|enja|enom|enoj|enog|enim|enih|anom|anoj|anog|anim|anih|eno|ovi|ova|oga|ima|ove|enu|anu|ena|ama");
-        wordStart.add(".+"); wordEnd.add("nijega|nijemu|nijima|nijeg|nijem|nijim|nijih|nima|niji|nije|nija|niju|noj|nom|nog|nim|nih|an|na|nu|ni|ne|no");
-        wordStart.add(".+"); wordEnd.add("om|og|im|ih|em|oj|an|u|o|i|e|a");
+        wordStart.add(".+(s|š)k");
+        wordEnd.add("ijima|ijega|ijemu|ijem|ijim|ijih|ijoj|ijeg|iji|ije|ija|oga|ome|omu|ima|og|om|im|ih|oj|i|e|o|a|u");
+        wordStart.add(".+(s|š)tv");
+        wordEnd.add("ima|om|o|a|u");
+        wordStart.add(".+(t|m|p|r|g)anij");
+        wordEnd.add("ama|ima|om|a|u|e|i|");
+        wordStart.add(".+an");
+        wordEnd.add("inom|ina|inu|ine|ima|in|om|u|i|a|e|");
+        wordStart.add(".+in");
+        wordEnd.add("ima|ama|om|a|e|i|u|o|");
+        wordStart.add(".+on");
+        wordEnd.add("ovima|ova|ove|ovi|ima|om|a|e|i|u|");
+        wordStart.add(".+n");
+        wordEnd.add("ijima|ijega|ijemu|ijeg|ijem|ijim|ijih|ijoj|iji|ije|ija|iju|ima|ome|omu|oga|oj|om|ih|im|og|o|e|a|u|i|");
+        wordStart.add(".+(a|e|u)ć");
+        wordEnd.add("oga|ome|omu|ega|emu|ima|oj|ih|om|eg|em|og|uh|im|e|a");
+        wordStart.add(".+ugov");
+        wordEnd.add("ima|i|e|a");
+        wordStart.add(".+ug");
+        wordEnd.add("ama|om|a|e|i|u|o");
+        wordStart.add(".+log");
+        wordEnd.add("ama|om|a|u|e|");
+        wordStart.add(".+[^eo]g");
+        wordEnd.add("ovima|ama|ovi|ove|ova|om|a|e|i|u|o|");
+        wordStart.add(".+(rrar|ott|ss|ll)i");
+        wordEnd.add("jem|ja|ju|o|");
+        wordStart.add(".+uj");
+        wordEnd.add("ući|emo|ete|mo|em|eš|e|u|");
+        wordStart.add(".+(c|č|ć|đ|l|r)aj");
+        wordEnd.add("evima|evi|eva|eve|ama|ima|em|a|e|i|u|");
+        wordStart.add(".+(b|c|d|l|n|m|ž|g|f|p|r|s|t|z)ij");
+        wordEnd.add("ima|ama|om|a|e|i|u|o|");
+        wordStart.add(".+[^z]nal");
+        wordEnd.add("ima|ama|om|a|e|i|u|o|");
+        wordStart.add(".+ijal");
+        wordEnd.add("ima|ama|om|a|e|i|u|o|");
+        wordStart.add(".+ozil");
+        wordEnd.add("ima|om|a|e|u|i|");
+        wordStart.add(".+olov");
+        wordEnd.add("ima|i|a|e");
+        wordStart.add(".+ol");
+        wordEnd.add("ima|om|a|u|e|i|");
+        wordStart.add(".+lem");
+        wordEnd.add("ama|ima|om|a|e|i|u|o|");
+        wordStart.add(".+ram");
+        wordEnd.add("ama|om|a|e|i|u|o");
+        wordStart.add(".+(a|d|e|o)r");
+        wordEnd.add("ama|ima|om|u|a|e|i|");
+        wordStart.add(".+(e|i)s");
+        wordEnd.add("ima|om|e|a|u");
+        wordStart.add(".+(t|n|j|k|j|t|b|g|v)aš");
+        wordEnd.add("ama|ima|om|em|a|u|i|e|");
+        wordStart.add(".+(e|i)š");
+        wordEnd.add("ima|ama|om|em|i|e|a|u|");
+        wordStart.add(".+ikat");
+        wordEnd.add("ima|om|a|e|i|u|o|");
+        wordStart.add(".+lat");
+        wordEnd.add("ima|om|a|e|i|u|o|");
+        wordStart.add(".+et");
+        wordEnd.add("ama|ima|om|a|e|i|u|o|");
+        wordStart.add(".+(e|i|k|o)st");
+        wordEnd.add("ima|ama|om|a|e|i|u|o|");
+        wordStart.add(".+išt");
+        wordEnd.add("ima|em|a|e|u");
+        wordStart.add(".+ova");
+        wordEnd.add("smo|ste|hu|ti|še|li|la|le|lo|t|h|o");
+        wordStart.add(".+(a|e|i)v");
+        wordEnd.add("ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|ama|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|o|");
+        wordStart.add(".+[^dkml]ov");
+        wordEnd.add("ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|o|");
+        wordStart.add(".+(m|l)ov");
+        wordEnd.add("ima|om|a|u|e|i|");
+        wordStart.add(".+el");
+        wordEnd.add("ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|o|");
+        wordStart.add(".+(a|e|š)nj");
+        wordEnd.add("ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|iji|ije|ija|iju|ega|emu|eg|em|im|ih|oj|om|og|a|e|i|o|u");
+        wordStart.add(".+čin");
+        wordEnd.add("ama|ome|omu|oga|ima|og|om|im|ih|oj|a|u|i|o|e|");
+        wordStart.add(".+roši");
+        wordEnd.add("vši|smo|ste|še|mo|te|ti|li|la|lo|le|m|š|t|h|o");
+        wordStart.add(".+oš");
+        wordEnd.add("ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|");
+        wordStart.add(".+(e|o)vit");
+        wordEnd.add("ijima|ijega|ijemu|ijem|ijim|ijih|ijoj|ijeg|iji|ije|ija|oga|ome|omu|ima|og|om|im|ih|oj|i|e|o|a|u|");
+        wordStart.add(".+ast");
+        wordEnd.add("ijima|ijega|ijemu|ijem|ijim|ijih|ijoj|ijeg|iji|ije|ija|oga|ome|omu|ima|og|om|im|ih|oj|i|e|o|a|u|");
+        wordStart.add(".+k");
+        wordEnd.add("ijemu|ijima|ijega|ijeg|ijem|ijim|ijih|ijoj|oga|ome|omu|ima|iji|ije|ija|iju|im|ih|oj|om|og|i|a|u|e|o|");
+        wordStart.add(".+(e|a|i|u)va");
+        wordEnd.add("jući|smo|ste|jmo|jte|ju|la|le|li|lo|mo|na|ne|ni|no|te|ti|še|hu|h|j|m|n|o|t|v|š|");
+        wordStart.add(".+ir");
+        wordEnd.add("ujemo|ujete|ujući|ajući|ivat|ujem|uješ|ujmo|ujte|avši|asmo|aste|ati|amo|ate|aju|aše|ahu|ala|alo|ali|ale|uje|uju|uj|al|an|am|aš|at|ah|ao");
+        wordStart.add(".+ač");
+        wordEnd.add("ismo|iste|iti|imo|ite|iše|eći|ila|ilo|ili|ile|ena|eno|eni|ene|io|im|iš|it|ih|en|i|e");
+        wordStart.add(".+ača");
+        wordEnd.add("vši|smo|ste|smo|ste|hu|ti|mo|te|še|la|lo|li|le|ju|na|no|ni|ne|o|m|š|t|h|n");
+        wordStart.add(".+n");
+        wordEnd.add("uvši|usmo|uste|ući|imo|ite|emo|ete|ula|ulo|ule|uli|uto|uti|uta|em|eš|uo|ut|e|u|i");
+        wordStart.add(".+ni");
+        wordEnd.add("vši|smo|ste|ti|mo|te|mo|te|la|lo|le|li|m|š|o");
+        wordStart.add(".+((a|r|i|p|e|u)st|[^o]g|ik|uc|oj|aj|lj|ak|ck|čk|šk|uk|nj|im|ar|at|et|št|it|ot|ut|zn|zv)a");
+        wordEnd.add("jući|vši|smo|ste|jmo|jte|jem|mo|te|je|ju|ti|še|hu|la|li|le|lo|na|no|ni|ne|t|h|o|j|n|m|š");
+        wordStart.add(".+ur");
+        wordEnd.add("ajući|asmo|aste|ajmo|ajte|amo|ate|aju|ati|aše|ahu|ala|ali|ale|alo|ana|ano|ani|ane|al|at|ah|ao|aj|an|am|aš");
+        wordStart.add(".+(a|i|o)staj");
+        wordEnd.add("asmo|aste|ahu|ati|emo|ete|aše|ali|ući|ala|alo|ale|mo|ao|em|eš|at|ah|te|e|u|");
+        wordStart.add(".+(b|c|č|ć|d|e|f|g|j|k|n|r|t|u|v)a");
+        wordEnd.add("lama|lima|lom|lu|li|la|le|lo|l");
+        wordStart.add(".+(t|č|j|ž|š)aj");
+        wordEnd.add("evima|evi|eva|eve|ama|ima|em|a|e|i|u|");
+        wordStart.add(".+([^o]m|ič|nč|uč|b|c|ć|d|đ|h|j|k|l|n|p|r|s|š|v|z|ž)a");
+        wordEnd.add("jući|vši|smo|ste|jmo|jte|mo|te|ju|ti|še|hu|la|li|le|lo|na|no|ni|ne|t|h|o|j|n|m|š");
+        wordStart.add(".+(a|i|o)sta");
+        wordEnd.add("dosmo|doste|doše|nemo|demo|nete|dete|nimo|nite|nila|vši|nem|dem|neš|deš|doh|de|ti|ne|nu|du|la|li|lo|le|t|o");
+        wordStart.add(".+ta");
+        wordEnd.add("smo|ste|jmo|jte|vši|ti|mo|te|ju|še|la|lo|le|li|na|no|ni|ne|n|j|o|m|š|t|h");
+        wordStart.add(".+inj");
+        wordEnd.add("asmo|aste|ati|emo|ete|ali|ala|alo|ale|aše|ahu|em|eš|at|ah|ao");
+        wordStart.add(".+as");
+        wordEnd.add("temo|tete|timo|tite|tući|tem|teš|tao|te|li|ti|la|lo|le");
+        wordStart.add(".+(elj|ulj|tit|ac|ič|od|oj|et|av|ov)i");
+        wordEnd.add("vši|eći|smo|ste|še|mo|te|ti|li|la|lo|le|m|š|t|h|o");
+        wordStart.add(".+(tit|jeb|ar|ed|uš|ič)i");
+        wordEnd.add("jemo|jete|jem|ješ|smo|ste|jmo|jte|vši|mo|še|te|ti|ju|je|la|lo|li|le|t|m|š|h|j|o");
+        wordStart.add(".+(b|č|d|l|m|p|r|s|š|ž)i");
+        wordEnd.add("jemo|jete|jem|ješ|smo|ste|jmo|jte|vši|mo|lu|še|te|ti|ju|je|la|lo|li|le|t|m|š|h|j|o");
+        wordStart.add(".+luč");
+        wordEnd.add("ujete|ujući|ujemo|ujem|uješ|ismo|iste|ujmo|ujte|uje|uju|iše|iti|imo|ite|ila|ilo|ili|ile|ena|eno|eni|ene|uj|io|en|im|iš|it|ih|e|i");
+        wordStart.add(".+jeti");
+        wordEnd.add("smo|ste|še|mo|te|ti|li|la|lo|le|m|š|t|h|o");
+        wordStart.add(".+e");
+        wordEnd.add("lama|lima|lom|lu|li|la|le|lo|l");
+        wordStart.add(".+i");
+        wordEnd.add("lama|lima|lom|lu|li|la|le|lo|l");
+        wordStart.add(".+at");
+        wordEnd.add("ijega|ijemu|ijima|ijeg|ijem|ijih|ijim|ima|oga|ome|omu|iji|ije|ija|iju|oj|og|om|im|ih|a|u|i|e|o|");
+        wordStart.add(".+et");
+        wordEnd.add("avši|ući|emo|imo|em|eš|e|u|i");
+        wordStart.add(".+");
+        wordEnd.add("ajući|alima|alom|avši|asmo|aste|ajmo|ajte|ivši|amo|ate|aju|ati|aše|ahu|ali|ala|ale|alo|ana|ano|ani|ane|am|aš|at|ah|ao|aj|an");
+        wordStart.add(".+");
+        wordEnd.add("anje|enje|anja|enja|enom|enoj|enog|enim|enih|anom|anoj|anog|anim|anih|eno|ovi|ova|oga|ima|ove|enu|anu|ena|ama");
+        wordStart.add(".+");
+        wordEnd.add("nijega|nijemu|nijima|nijeg|nijem|nijim|nijih|nima|niji|nije|nija|niju|noj|nom|nog|nim|nih|an|na|nu|ni|ne|no");
+        wordStart.add(".+");
+        wordEnd.add("om|og|im|ih|em|oj|an|u|o|i|e|a");
 
         assert wordStart.size() == wordEnd.size();
 
